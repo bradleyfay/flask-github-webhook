@@ -20,27 +20,38 @@ def hello_world():
 @webhook.hook()        # Defines a handler for the 'push' event
 def on_push(data):
     if data['ref'].lstrip('refs/heads/') == 'master':
-        logging.info("Checking out master")
+        logger.info("Checking out master")
         repo.heads.master.checkout()
 
-        logging.info("Pulling updates to master")
+        logger.info("Pulling updates to master")
         repo.git.pull()
 
-        logging.info("Restarting Webserver")
+        logger.info("Restarting Webserver")
         subprocess.check_call(restart_webserver)
 
-        logging.info("Restarting Scheduler")
+        logger.info("Restarting Scheduler")
         subprocess.check_call(restart_scheduler)
     else:
-        logging.info('Received Push from {0}'.format(data['ref'].lstrip('refs/heads/')))
+        logger.info('Received Push from {0}'.format(data['ref'].lstrip('refs/heads/')))
 
 
 
-logging.getLogger(__name__).addHandler(logging.StreamHandler())
-logging.basicConfig(filename='githooks.log', 
-                    format='%(asctime)s - %(levelname)s:%(message)s',
-                    datefmt='%m-%d-%Y %I:%M:%S %p',
-                    level=logging.INFO)
+logger = logging.getLogger('sample_logger')
+logger.setLevel(logging.INFO)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+
+fh = logging.handlers.RotatingFileHandler('githooks.log', maxBytes=50000000, backupCount=3)
+fh.setLevel(logging.INFO)
+
+formatter = logging.Formatter(fmt='%(asctime)s - %(levelname)s:%(message)s',
+                              datefmt='%Y-%m-%d %H:%M:%S')
+ch.setFormatter(formatter)
+fh.setFormatter(formatter)
+
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 if __name__ == "__main__":
