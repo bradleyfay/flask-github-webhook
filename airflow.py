@@ -20,7 +20,7 @@ def hello_world():
 
 @webhook.hook()        # Defines a handler for the 'push' event
 def on_push(data):
-    if data['ref'].lstrip('refs/heads/') == 'master':
+    if data['ref'].replace('refs/heads/','') == 'master':
         logger.info("Checking out master")
         repo.heads.master.checkout()
 
@@ -33,7 +33,7 @@ def on_push(data):
         logger.info("Restarting Scheduler")
         subprocess.check_call(restart_scheduler)
     else:
-        logger.info('Received Push from {0}'.format(data['ref'].lstrip('refs/heads/')))
+        logger.info('Received Push from {0}'.format(data['ref'].replace('refs/heads/','')))
 
 
 
