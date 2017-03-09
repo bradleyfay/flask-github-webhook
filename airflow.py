@@ -11,8 +11,8 @@ webhook = Webhook(app) # Defines '/postreceive' endpoint
 
 repo = Repo("/home/ubuntu/airflow/dags/")
 
-restart_webserver = ['sudo', 'initctl', 'restart', 'airflow-webserver']
-restart_scheduler = ['sudo', 'initctl', 'restart', 'airflow-scheduler']
+restart_webserver = ['sudo', 'systemctl', 'restart', 'airflow-webserver']
+restart_scheduler = ['sudo', 'systemctl', 'restart', 'airflow-scheduler']
 
 @app.route("/")        # Standard Flask endpoint
 def hello_world():
@@ -21,10 +21,10 @@ def hello_world():
 @webhook.hook()        # Defines a handler for the 'push' event
 def on_push(data):
     if data['ref'].replace('refs/heads/','') == 'master':
-        logger.info("Checking out master")
+        logger.info("Checking out develop")
         repo.heads.master.checkout()
 
-        logger.info("Pulling updates to master")
+        logger.info("Pulling updates to develop")
         repo.git.pull()
 
         logger.info("Restarting Webserver")
